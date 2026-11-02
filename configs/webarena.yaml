@@ -1,0 +1,19 @@
+# WebArena / VisualWebArena environment config
+# Point base_url at your WebArena server (or a local test page for smoke tests).
+server:
+  base_url: "http://localhost:8080"
+  timeout_ms: 30000
+
+tasks:
+  # path to a JSON list of task definitions (see WebArenaEnvironment docs)
+  definitions: "./data/webarena/tasks.json"
+
+agent:
+  max_steps: 20
+  grounding: "som"
+
+output:
+  dir: "./experiments/webarena/"
+
+random:
+  seed: 42

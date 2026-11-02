@@ -1,0 +1,214 @@
+{
+  "summary": {
+    "model_used": "Qwen2.5-VL-3B-Instruct (Ollama local inference)",
+    "gui_actor_loaded": false,
+    "secondary_vlm_used": null,
+    "audit_timestamp": "2026-11-01T08:12:32.968787+00:00",
+    "total_tests": 1,
+    "total_pass_autonomous": 1,
+    "popup_handling_success_rate": "0.0%",
+    "date_selection_accuracy": "0.0%",
+    "async_waiting_success_rate": "0.0%",
+    "end_to_end_task_success_rate": "100.0%",
+    "false_success_rate": "0.0%",
+    "duplicate_submission_rate": "0.0%",
+    "timeout_rate": "0.0%",
+    "average_completion_latency": "133.99s",
+    "effective_controller_config": {
+      "model": "Qwen2.5-VL-3B-Instruct (Ollama local inference)",
+      "gui_actor_loaded": false,
+      "secondary_vlm_used": null,
+      "enable_planning": true,
+      "enable_micro_planner": true,
+      "enable_task_compiler": true,
+      "enable_contract_validation": true,
+      "enable_stv": true,
+      "enable_popup_gate": true,
+      "enable_date_picker": true,
+      "task_persistence": true,
+      "reusable_skills": true,
+      "viewport": {
+        "width": 1280,
+        "height": 1024
+      }
+    }
+  },
+  "results": [
+    {
+      "test_id": "TASK_D_COMBINED",
+      "scenario": "Combined Appointment Workflow with Qwen2.5-VL-3B",
+      "category": "combined",
+      "outcome": "PASS_AUTONOMOUS",
+      "qwen_invoked": true,
+      "qwen_invocations": 5,
+      "model_decisions_used": 4,
+      "executed_actions": 4,
+      "recovery_attempts": 0,
+      "initial_state": {
+        "cookie_visible": true,
+        "status": "Not submitted."
+      },
+      "expected": "Reject cookies, fill Alex Rivera, date 2026-11-18, single submit, ref APPT-DEMO-001",
+      "actual": "Status: 'Appointment saved successfully. Reference: APPT-DEMO-001 \u00b7 Date: 2026-11-18', Form valid=True, Ref=True, Submissions=1, Duplicates=0",
+      "stv_result": "PASS",
+      "browser_assertion": "PASS",
+      "submissions_processed": 1,
+      "duplicate_submissions": 0,
+      "latency": 133.994,
+      "failure_reason": "",
+      "trace": [
+        {
+          "step": 1,
+          "subgoal": "S1",
+          "intent": "Reject optional cookies",
+          "qwen_invoked": true,
+          "qwen_latency": 21.946,
+          "qwen_raw_response": "{\n  \"action\": \"click\",\n  \"target\": \"Reject optional cookies\",\n  \"value\": \"\"\n}",
+          "planned": {
+            "action": "click",
+            "target": "Reject optional cookies",
+            "value": "",
+            "expected_transition": {
+              "must_change": [
+                "page state changes"
+              ],
+              "must_be_true": [],
+              "must_remain_true": [],
+              "must_not_happen": []
+            }
+          },
+          "executed_by": "popup_gate",
+          "state_before": {
+            "cookie_visible": true,
+            "status": "Not submitted."
+          },
+          "state_after": {
+            "cookie_visible": false,
+            "status": "Not submitted."
+          },
+          "stv_decision": "PASS",
+          "stv_reason": "Transition verified",
+          "skill_used": false
+        },
+        {
+          "step": 2,
+          "subgoal": "S2",
+          "intent": "Fill full name",
+          "qwen_invoked": true,
+          "qwen_latency": 21.463,
+          "qwen_raw_response": "{\n  \"action\": \"type\",\n  \"target\": \"Full name\",\n  \"value\": \"Alex Rivera\"\n}",
+          "planned": {
+            "action": "type",
+            "target": "Full name",
+            "value": "Alex Rivera",
+            "expected_transition": {
+              "must_change": [
+                "\"Alex Rivera\""
+              ],
+              "must_be_true": [],
+              "must_remain_true": [],
+              "must_not_happen": []
+            }
+          },
+          "executed_by": "qwen_grounded_execution",
+          "state_before": {
+            "cookie_visible": false,
+            "status": "Not submitted."
+          },
+          "state_after": {
+            "cookie_visible": false,
+            "status": "Not submitted."
+          },
+          "stv_decision": "PASS",
+          "stv_reason": "Transition verified",
+          "skill_used": false
+        },
+        {
+          "step": 3,
+          "subgoal": "S3",
+          "intent": "Fill email",
+          "qwen_invoked": true,
+          "qwen_latency": 25.487,
+          "qwen_raw_response": "{\n  \"action\": \"type\",\n  \"target\": \"Email\",\n  \"value\": \"alex@example.test\"\n}",
+          "planned": {
+            "action": "type",
+            "target": "Email",
+            "value": "alex@example.test",
+            "expected_transition": {
+              "must_change": [
+                "\"alex@example.test\""
+              ],
+              "must_be_true": [],
+              "must_remain_true": [],
+              "must_not_happen": []
+            }
+          },
+          "executed_by": "qwen_grounded_execution",
+          "state_before": {
+            "cookie_visible": false,
+            "status": "Not submitted."
+          },
+          "state_after": {
+            "cookie_visible": false,
+            "status": "Not submitted."
+          },
+          "stv_decision": "PASS",
+          "stv_reason": "Transition verified",
+          "skill_used": false
+        },
+        {
+          "step": 4,
+          "subgoal": "S4",
+          "intent": "Select date November 18 2026",
+          "qwen_invoked": true,
+          "qwen_latency": 0.0,
+          "qwen_raw_response": "reusable_skill_executed",
+          "planned": {
+            "action": "skill_execution",
+            "target": "asynchronous_waiting",
+            "value": "2026-11-18"
+          },
+          "executed_by": "skill:asynchronous_waiting",
+          "state_before": {},
+          "state_after": {},
+          "stv_decision": "FAIL",
+          "stv_reason": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"button:has-text('Submit once'), #Submit once, [aria-label*='Submit once']\")\n    - locator resolved to <button class=\"primary\" id=\"slowSubmitButton\" onclick=\"runSlowSubmit()\">Submit once</button>\n  - attempting click action\n    2 \u00d7 waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 \u00d7 waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    58 \u00d7 waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n",
+          "skill_used": true
+        },
+        {
+          "step": 5,
+          "subgoal": "S5",
+          "intent": "Submit appointment form once",
+          "qwen_invoked": true,
+          "qwen_latency": 23.004,
+          "qwen_raw_response": "{\n  \"action\": \"click\",\n  \"target\": \"Submit appointment\",\n  \"value\": \"\"\n}",
+          "planned": {
+            "action": "click",
+            "target": "Submit appointment",
+            "value": "",
+            "expected_transition": {
+              "must_change": [
+                "page state changes"
+              ],
+              "must_be_true": [],
+              "must_remain_true": [],
+              "must_not_happen": []
+            }
+          },
+          "executed_by": "async_lock",
+          "state_before": {
+            "cookie_visible": false,
+            "status": "Not submitted."
+          },
+          "state_after": {
+            "cookie_visible": false,
+            "status": "Appointment saved successfully. Reference: APPT-DEMO-001 \u00b7 Date: 2026-11-18"
+          },
+          "stv_decision": "PASS",
+          "stv_reason": "Transition verified",
+          "skill_used": false
+        }
+      ]
+    }
+  ]
+}

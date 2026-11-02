@@ -1,0 +1,40 @@
+# Experiment matrix: coordinate vs SoM (+DOM, +verification)
+seed: 42
+
+experiments:
+  baseline_coordinate:
+    method: coordinate
+    grounding: coordinate
+    include_dom_in_prompt: false
+    use_verification: false
+
+  som:
+    method: som
+    grounding: som
+    include_dom_in_prompt: false
+    use_verification: false
+
+  som_dom:
+    method: som_dom
+    grounding: som
+    include_dom_in_prompt: true
+    use_verification: false
+
+  som_verification:
+    method: som_dom
+    grounding: som
+    include_dom_in_prompt: true
+    use_verification: true
+
+agent:
+  max_steps: 20
+  max_history: 10
+
+recovery:
+  max_re_ground_attempts: 2
+  max_recovery_attempts: 5
+  max_execution_retries: 3
+
+# Results table is populated ONLY from real experiment outputs.
+# Never hand-edit numbers into the table.
+results_table: "./experiments/results.md"

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GUI Web Agent — Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <header>
+    <div class="title">
+      <span class="logo">🤖</span>
+      <div>
+        <h1>GUI Web Agent</h1>
+        <p class="subtitle">Autonomous Web Navigation with VLM + HITL</p>
+      </div>
+    </div>
+    <div id="status-pill" class="pill idle" title="Agent status">⚪ Connecting…</div>
+  </header>
+  <main>
+    <section class="browser-pane">
+      <div class="pane-head">Browser / noVNC</div>
+      <div id="novnc-wrap">
+        <iframe id="novnc" title="noVNC browser session" allow="clipboard-read; clipboard-write"></iframe>
+        <div id="novnc-fallback" class="hidden">
+          <p>⚠ noVNC session unavailable through the dashboard.</p>
+          <p id="novnc-hint"></p>
+          <p><button id="novnc-retry">Retry</button></p>
+        </div>
+      </div>
+    </section>
+    <section class="chat-pane">
+      <div class="pane-head">Agent Chat</div>
+      <div id="chat"></div>
+      <form id="answer-form">
+        <input id="answer-input" type="text" placeholder="Waiting for the agent…" autocomplete="off" disabled>
+        <button type="submit" disabled>Submit</button>
+      </form>
+      <button id="captcha-solved" class="hidden">✓ CAPTCHA Solved</button>
+    </section>
+  </main>
+  <footer>
+    <span id="conn">🔌 connecting…</span>
+    <span class="spacer"></span>
+    <span>Single-port dashboard — SSH: <code>ssh -L 3000:localhost:3000</code></span>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+
+</html>

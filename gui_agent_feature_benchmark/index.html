@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GUI Agent Feature Benchmark</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#172033;background:#f3f6fb}
+*{box-sizing:border-box} body{margin:0} header{background:#14213d;color:#fff;padding:22px 28px}
+header h1{margin:0 0 7px;font-size:24px} header p{margin:0;color:#cbd5e1}
+main{max-width:1120px;margin:24px auto;padding:0 18px 48px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px}
+nav,.panel,.card{background:white;border:1px solid #dce3ee;border-radius:14px;box-shadow:0 4px 14px #15294b0a}
+nav{padding:12px;height:max-content;position:sticky;top:12px}
+nav button{display:block;width:100%;text-align:left;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:#334155;cursor:pointer;font-weight:650;margin:2px 0}
+nav button.active,nav button:hover{background:#eaf2ff;color:#174ea6}
+.content{min-width:0}.panel{padding:22px;margin-bottom:16px}.panel h2{margin:0 0 8px;font-size:22px}
+.muted{color:#64748b;line-height:1.5}.tag{display:inline-block;padding:4px 9px;border-radius:20px;background:#eaf2ff;color:#174ea6;font-size:12px;font-weight:700;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{padding:16px;box-shadow:none}.card h3{margin:0 0 8px;font-size:16px}
+label{display:block;font-weight:650;font-size:13px;color:#334155;margin:12px 0 5px}
+input,select,textarea{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;background:#fff;color:#172033}
+button.primary,button.secondary,button.danger{border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}
+button.primary{background:#2563eb;color:#fff}button.secondary{background:#e8eef7;color:#24324a}button.danger{background:#fee2e2;color:#991b1b}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.status{padding:11px 13px;background:#f1f5f9;border-radius:8px;margin-top:12px;min-height:42px;line-height:1.45}
+.status.ok{background:#dcfce7;color:#166534}.status.bad{background:#fee2e2;color:#991b1b}.status.wait{background:#fef3c7;color:#92400e}
+.hidden{display:none!important}
+.banner{position:fixed;left:18px;right:18px;bottom:18px;z-index:50;background:#fff;border:1px solid #cbd5e1;border-radius:14px;padding:18px;box-shadow:0 18px 60px #0f172a40;max-width:900px;margin:auto}
+.banner h3{margin:0 0 6px}.banner p{margin:0;color:#475569;line-height:1.5}
+.modal-backdrop{position:fixed;inset:0;background:#0f172a99;z-index:60;display:grid;place-items:center;padding:18px}
+.modal{background:white;border-radius:16px;padding:24px;width:min(480px,100%);box-shadow:0 20px 70px #0005}
+.modal h3{margin-top:0}.modal .close{float:right;border:0;background:#e2e8f0;border-radius:7px;padding:5px 10px;cursor:pointer}
+.calendar{border:1px solid #cbd5e1;border-radius:12px;padding:12px;margin-top:10px;max-width:370px;background:#fff}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cal-head button{border:1px solid #cbd5e1;background:#f8fafc;border-radius:7px;padding:7px 10px;cursor:pointer}
+.cal-title{font-weight:800;text-align:center;flex:1}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-grid span,.cal-grid button{padding:8px 0;text-align:center;border-radius:7px;font-size:13px}
+.cal-grid span{color:#64748b;font-weight:700}.cal-grid button{border:0;background:#f1f5f9;cursor:pointer}
+.cal-grid button:hover{background:#dbeafe}.cal-grid button.adjacent{color:#94a3b8}.cal-grid button.selected{background:#2563eb;color:#fff}
+.cal-grid button:disabled{opacity:.3;cursor:not-allowed;text-decoration:line-through}
+pre{white-space:pre-wrap;word-break:break-word;background:#0f172a;color:#dbeafe;padding:14px;border-radius:10px;max-height:340px;overflow:auto;font-size:12px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1px solid #e2e8f0;padding:9px 8px;font-size:13px;vertical-align:top}
+th{background:#f8fafc}
+.small{font-size:12px}.progress{height:8px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin-top:8px}.progress div{height:100%;width:0;background:#2563eb;transition:width .2s}
+@media(max-width:760px){.layout{grid-template-columns:1fr}nav{position:static;display:grid;grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>GUI Agent Feature Benchmark</h1>
+  <p>Local, self-contained test site for popup dismissal, date picker navigation, and asynchronous waiting.</p>
+</header>
+<main>
+  <div class="panel">
+    <span class="tag">TEST HARNESS</span>
+    <h2>Before you start</h2>
+    <p class="muted">Use this page as the website your real GUI agent visits. Pick a scenario from the left, reset it between runs, and give the agent the task text shown in the scenario. This page records browser-side events, but your agent still needs to interact through its normal planner, GUI-Actor, Playwright executor, and STV.</p>
+    <div class="actions">
+      <button class="secondary" onclick="resetAll()">Reset all scenarios</button>
+      <button class="secondary" onclick="downloadLog()">Download page event log</button>
+      <button class="secondary" onclick="clearLog()">Clear event log</button>
+    </div>
+    <div class="status" id="globalStatus" aria-live="polite">Ready. Choose a scenario to begin.</div>
+  </div>
+
+  <div class="layout">
+    <nav aria-label="Test scenarios">
+      <button class="active" data-view="overview">Overview</button>
+      <button data-view="popup">A. Popup / modal</button>
+      <button data-view="date">B. Date picker</button>
+      <button data-view="ajax">C. AJAX / waiting</button>
+      <button data-view="combined">D. Combined workflow</button>
+      <button data-view="logs">Event log</button>
+    </nav>
+
+    <div class="content">
+      <section class="view" id="view-overview">
+        <div class="panel">
+          <span class="tag">SCENARIO GUIDE</span><h2>Choose a test</h2>
+          <p class="muted">Each scenario has an explicit task and expected outcome. Start with the isolated tests, then use the combined appointment workflow.</p>
+          <table>
+            <thead><tr><th>Feature</th><th>Cases included</th><th>Primary success check</th></tr></thead>
+            <tbody>
+              <tr><td>Popup / modal</td><td>Cookie banner, blocking modal, delayed popup, optional consent</td><td>Dismiss appropriately, then continue the original task</td></tr>
+              <tr><td>Date picker</td><td>Month navigation, adjacent-month dates, month/year selectors, disabled dates</td><td>Input value is exactly <code>2026-11-18</code></td></tr>
+              <tr><td>AJAX / waiting</td><td>Delayed results, persistent requests, slow submission, failure</td><td>Wait for application state, not just network idle</td></tr>
+              <tr><td>Combined</td><td>Cookie banner + appointment date + delayed submit</td><td>Appointment submitted once with correct date</td></tr>
+            </tbody>
+          </table>
+          <p class="muted small">Recommended initial target: <code>http://127.0.0.1:8000/</code> after serving this file locally.</p>
+        </div>
+        <div class="panel">
+          <h2>Suggested test order</h2>
+          <ol class="muted">
+            <li>Popup → cookie banner → reject optional cookies.</li>
+            <li>Popup → delayed modal appears after 2 seconds.</li>
+            <li>Date picker → select 18 November 2026 from October 2026.</li>
+            <li>Date picker → navigate from December 2026 back to November.</li>
+            <li>AJAX → delayed results while persistent background requests continue.</li>
+            <li>Combined → complete the appointment workflow.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-popup">
+        <div class="panel">
+          <span class="tag">TEST A</span><h2>Popup and modal dismissal</h2>
+          <p class="muted">Run each case separately. The task text is designed to test whether the agent can dismiss an obstruction without blindly accepting optional consent.</p>
+          <div class="grid">
+            <div class="card">
+              <h3>A1 · Cookie banner</h3>
+              <p class="muted">A banner blocks the lower part of the page. Reject optional cookies or customize settings; do not assume consent is required.</p>
+              <div class="actions"><button class="primary" onclick="showCookieBanner()">Show cookie banner</button><button class="secondary" onclick="hideCookieBanner('manual')">Hide banner</button></div>
+              <p class="small"><b>Agent task:</b> “Reject optional cookies if possible, then fill the profile form with name Alex Rivera and email alex@example.test.”</p>
+            </div>
+            <div class="card">
+              <h3>A2 · Blocking modal</h3>
+              <p class="muted">Modal blocks the page. Close or cancel it, then continue to the form.</p>
+              <div class="actions"><button class="primary" onclick="showModal()">Open blocking modal</button></div>
+              <p class="small"><b>Agent task:</b> “Close the blocking dialog without submitting it, then fill the profile form.”</p>
+            </div>
+            <div class="card">
+              <h3>A3 · Delayed popup</h3>
+              <p class="muted">Popup appears two seconds after activation, testing whether the agent refreshes its view of the page.</p>
+              <div class="actions"><button class="primary" onclick="schedulePopup()">Schedule delayed popup (2s)</button></div>
+              <p class="small"><b>Agent task:</b> “Fill the profile form. If a popup appears and blocks the task, dismiss it appropriately and continue.”</p>
+            </div>
+            <div class="card">
+              <h3>A4 · Non-blocking promotion</h3>
+              <p class="muted">A harmless promotional panel does not prevent form interaction. Decide whether dismissing it is necessary.</p>
+              <div class="actions"><button class="primary" onclick="showPromo()">Show non-blocking promotion</button><button class="secondary" onclick="hidePromo()">Dismiss promotion</button></div>
+              <p class="small"><b>Agent task:</b> “Fill the profile form. Avoid unnecessary actions if the promotion does not block the task.”</p>
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <h3>A5 · Consent choice test</h3>
+            <p class="muted">The banner offers three distinct choices. The agent should not blindly click “Accept all”.</p>
+            <div class="actions"><button class="primary" onclick="showConsentBanner()">Show consent choices</button></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Profile form (task target)</h2>
+          <div class="grid">
+            <div><label for="profileName">Full name</label><input id="profileName" placeholder="Enter full name"></div>
+            <div><label for="profileEmail">Email</label><input id="profileEmail" type="email" placeholder="name@example.test"></div>
+          </div>
+          <div class="actions"><button class="primary" onclick="submitProfile()">Save profile</button><button class="secondary" onclick="resetProfile()">Reset form</button></div>
+          <div id="profileStatus" class="status" aria-live="polite">Profile not saved.</div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-date">
+        <div class="panel">
+          <span class="tag">TEST B</span><h2>Date picker handling</h2>
+          <p class="muted">This custom calendar exposes real buttons and a visible month/year label. It deliberately includes adjacent-month dates, disabled dates, and a dropdown mode.</p>
+          <div class="grid">
+            <div class="card">
+              <h3>Calendar setup</h3>
+              <label for="calendarStart">Initial visible month</label>
+              <select id="calendarStart" onchange="setCalendarStart(this.value)">
+                <option value="2026-10-01">October 2026</option>
+                <option value="2026-12-01">December 2026</option>
+                <option value="2026-06-01">June 2026 (multi-month)</option>
+                <option value="2027-02-01">February 2027 (multi-month)</option>
+              </select>
+              <label for="dateMode">Picker style</label>
+              <select id="dateMode" onchange="renderCalendar()">
+                <option value="arrows">Previous/next month buttons</option>
+                <option value="dropdowns">Month/year dropdowns</option>
+              </select>
+              <label for="dateTarget">Target date (ISO)</label>
+              <input id="dateTarget" type="date" value="2026-11-18">
+              <div class="actions"><button class="primary" onclick="openCalendar()">Open date picker</button><button class="secondary" onclick="resetDateTest()">Reset test</button></div>
+              <p class="small"><b>Agent task:</b> “Set the appointment date to 18 November 2026. Verify the final field value.”</p>
+            </div>
+            <div class="card">
+              <h3>Form field</h3>
+              <label for="appointmentDate">Appointment date</label>
+              <input id="appointmentDate" type="text" readonly placeholder="Choose a date" aria-label="Appointment date">
+              <div id="calendarRoot"></div>
+              <div id="dateStatus" class="status" aria-live="polite">No date selected.</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Additional date edge cases</h2>
+          <div class="grid">
+            <div class="card">
+              <h3>Disabled date</h3>
+              <p class="muted">The 15th of each month is disabled.</p>
+              <p class="small">Task: “Select 15 November 2026.” Expected: report unavailable; do not silently choose another date.</p>
+              <button class="secondary" onclick="document.getElementById('dateTarget').value='2026-11-15';setCalendarStart('2026-11-01');openCalendar()">Prepare disabled-date case</button>
+            </div>
+            <div class="card">
+              <h3>Date format ambiguity</h3>
+              <p class="muted">Use the date input and displayed ISO format to avoid silently swapping day and month.</p>
+              <p class="small">Task: “Set the date to 05/11/2026.” Expected: infer only when the site convention makes it clear; otherwise ask.</p>
+              <button class="secondary" onclick="setGlobal('Ambiguity case ready: ask the agent to interpret 05/11/2026 using the displayed date convention.')">Prepare ambiguity case</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-ajax">
+        <div class="panel">
+          <span class="tag">TEST C</span><h2>Slow network and asynchronous waiting</h2>
+          <p class="muted">These scenarios simulate delayed application state. The persistent-request toggle uses harmless periodic fetches to a local endpoint when served over HTTP; it is not a real external network dependency.</p>
+          <div class="grid">
+            <div class="card">
+              <h3>C1 · Delayed search results</h3>
+              <label for="searchDelay">Delay (milliseconds)</label><input id="searchDelay" type="number" min="100" max="15000" value="3000">
+              <label for="searchQuery">Search query</label><input id="searchQuery" value="laptop">
+              <div class="actions"><button class="primary" onclick="runSearch()">Search</button><button class="secondary" onclick="resetSearch()">Reset</button></div>
+              <div id="searchStatus" class="status" aria-live="polite">No search run yet.</div>
+              <div id="searchResults" class="status hidden"></div>
+              <p class="small"><b>Agent task:</b> “Search for laptop and wait until the result list is populated.”</p>
+            </div>
+            <div class="card">
+              <h3>C2 · Slow form submission</h3>
+              <label for="submitDelay">Processing delay (milliseconds)</label><input id="submitDelay" type="number" min="100" max="20000" value="5000">
+              <label for="failureMode">Submission outcome</label>
+              <select id="failureMode"><option value="success">Success</option><option value="fail">Fail with error</option></select>
+              <div class="actions"><button class="primary" id="slowSubmitButton" onclick="runSlowSubmit()">Submit once</button><button class="secondary" onclick="resetSlowSubmit()">Reset</button></div>
+              <div id="slowSubmitStatus" class="status" aria-live="polite">Not submitted.</div>
+              <p class="small"><b>Agent task:</b> “Submit the form once, wait for completion, and verify the result. Do not click Submit repeatedly.”</p>
+            </div>
+            <div class="card">
+              <h3>C3 · Persistent background traffic</h3>
+              <p class="muted">Keeps producing harmless local requests while enabled. A network-idle-only strategy may struggle, while an application-condition wait should still work.</p>
+              <div class="actions"><button class="primary" onclick="toggleBackground()">Start background requests</button><button class="secondary" onclick="stopBackground()">Stop requests</button></div>
+              <div id="backgroundStatus" class="status">Background requests are stopped.</div>
+              <p class="small"><b>Agent task:</b> “With background requests running, perform the search and finish when results are visible.”</p>
+            </div>
+            <div class="card">
+              <h3>C4 · Delayed UI update</h3>
+              <p class="muted">Clicking the button leaves the old text visible briefly before changing it.</p>
+              <div class="actions"><button class="primary" onclick="runDelayedUpdate()">Trigger update (2.5s)</button></div>
+              <div id="updateStatus" class="status">State: READY</div>
+              <p class="small"><b>Agent task:</b> “Trigger the update and verify that the state becomes UPDATED.”</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-combined">
+        <div class="panel">
+          <span class="tag">TEST D</span><h2>Combined appointment workflow</h2>
+          <p class="muted">Use this after testing each feature separately. Reset the page between trials.</p>
+          <div class="status"><b>Agent task:</b> “Reject optional cookies if a consent banner appears. Complete the appointment form with name Alex Rivera and email alex@example.test. Set the appointment date to 18 November 2026, submit once, wait for the result, and verify that the appointment was saved.”</div>
+          <div class="actions"><button class="primary" onclick="startCombined()">Start combined test</button><button class="secondary" onclick="resetCombined()">Reset combined test</button></div>
+        </div>
+        <div class="panel">
+          <h2>Appointment form</h2>
+          <div class="grid">
+            <div><label for="combinedName">Full name</label><input id="combinedName" placeholder="Full name"></div>
+            <div><label for="combinedEmail">Email</label><input id="combinedEmail" type="email" placeholder="Email"></div>
+          </div>
+          <div class="grid">
+            <div><label for="combinedDate">Appointment date</label><input id="combinedDate" type="date" value="2026-11-18"></div>
+            <div><label for="combinedNote">Note (optional)</label><input id="combinedNote" value="Routine appointment"></div>
+          </div>
+          <div class="actions"><button class="primary" id="combinedSubmit" onclick="submitCombined()">Submit appointment</button></div>
+          <div id="combinedStatus" class="status" aria-live="polite">Not submitted.</div>
+          <div class="progress"><div id="combinedProgress"></div></div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-logs">
+        <div class="panel">
+          <span class="tag">OBSERVABILITY</span><h2>Page event log</h2>
+          <p class="muted">This log captures events inside the test page. Combine it with your agent's own action, grounder, STV, and recovery logs for a complete diagnosis.</p>
+          <div class="actions"><button class="secondary" onclick="downloadLog()">Download JSON</button><button class="danger" onclick="clearLog()">Clear log</button></div>
+          <pre id="eventLog">No events yet.</pre>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div id="cookieBanner" class="banner hidden" role="dialog" aria-label="Cookie preferences">
+  <h3>Cookie preferences</h3>
+  <p>We use essential cookies to run this demo. Optional analytics cookies are disabled unless you choose otherwise.</p>
+  <div class="actions">
+    <button class="primary" onclick="chooseConsent('accepted_all')">Accept all</button>
+    <button class="secondary" onclick="chooseConsent('rejected_optional')">Reject optional cookies</button>
+    <button class="secondary" onclick="showCustomize()">Customize</button>
+    <button class="secondary" aria-label="Close cookie banner" onclick="hideCookieBanner('close')">×</button>
+  </div>
+</div>
+<div id="customizeBanner" class="banner hidden" role="dialog" aria-label="Customize cookie settings">
+  <h3>Customize cookie settings</h3>
+  <p>Essential cookies are always on. Optional analytics cookies are off by default.</p>
+  <label><input id="analyticsOptIn" type="checkbox" style="width:auto"> Enable optional analytics cookies</label>
+  <div class="actions"><button class="primary" onclick="saveCustomize()">Save settings</button><button class="secondary" onclick="showCookieBanner()">Back</button></div>
+</div>
+<div id="blockingModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <button class="close" aria-label="Close dialog" onclick="hideModal('close')">×</button>
+    <h3 id="modalTitle">Session notice</h3>
+    <p>This informational dialog blocks the page until dismissed. It is not a form submission confirmation.</p>
+    <div class="actions"><button class="primary" onclick="hideModal('cancel')">Cancel and continue</button></div>
+  </div>
+</div>
+<div id="promo" class="banner hidden" style="left:auto;right:20px;bottom:20px;max-width:320px" role="complementary" aria-label="Promotion">
+  <h3>Demo promotion</h3><p>This panel does not block the form. The task can continue without dismissing it.</p>
+  <div class="actions"><button class="secondary" onclick="hidePromo()">Close promotion</button></div>
+</div>
+
+<script>
+const eventLog = [];
+let backgroundTimer = null;
+let backgroundCount = 0;
+let delayedPopupTimer = null;
+let calendarDate = new Date(2026, 9, 1);
+let selectedDate = null;
+let combinedBusy = false;
+let searchRunId = 0;
+let submitRunId = 0;
+
+function logEvent(type, detail={}) {
+  const row = { time: new Date().toISOString(), type, detail };
+  eventLog.push(row);
+  renderLog();
+  const gl = document.getElementById('globalStatus');
+  if (gl) gl.textContent = `${row.time.slice(11,19)} · ${type}`;
+}
+function setGlobal(text){document.getElementById('globalStatus').textContent=text;logEvent('note',{message:text});}
+function renderLog(){
+ const el=document.getElementById('eventLog');
+ if(el) el.textContent=eventLog.length?eventLog.map(x=>JSON.stringify(x)).join('\n'):'No events yet.';
+}
+function downloadLog(){
+ const blob=new Blob([JSON.stringify({generated_at:new Date().toISOString(),events:eventLog},null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='gui-agent-page-events.json';a.click();URL.revokeObjectURL(url);
+ logEvent('event_log_downloaded',{count:eventLog.length});
+}
+function clearLog(){eventLog.length=0;renderLog();logEvent('event_log_cleared');}
+function showView(name){
+ document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));
+ document.getElementById('view-'+name).classList.remove('hidden');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
+ logEvent('scenario_opened',{scenario:name});
+}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+function resetAll(){
+ stopBackground();clearTimeout(delayedPopupTimer);
+ document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));
+ document.getElementById('view-overview').classList.remove('hidden');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='overview'));
+ ['cookieBanner','customizeBanner','blockingModal','promo'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+ resetProfile();resetDateTest();resetSearch();resetSlowSubmit();resetCombined();
+ setGlobal('All scenarios reset.');
+ logEvent('all_scenarios_reset');
+}
+function showCookieBanner(){document.getElementById('customizeBanner').classList.add('hidden');document.getElementById('cookieBanner').classList.remove('hidden');logEvent('cookie_banner_shown');}
+function hideCookieBanner(reason){document.getElementById('cookieBanner').classList.add('hidden');document.getElementById('customizeBanner').classList.add('hidden');logEvent('cookie_banner_hidden',{reason});}
+function chooseConsent(choice){hideCookieBanner('choice');logEvent('consent_choice',{choice});}
+function showCustomize(){document.getElementById('cookieBanner').classList.add('hidden');document.getElementById('customizeBanner').classList.remove('hidden');logEvent('consent_customize_opened');}
+function saveCustomize(){const enabled=document.getElementById('analyticsOptIn').checked;hideCookieBanner('customize_saved');logEvent('consent_settings_saved',{optional_analytics:enabled});}
+function showModal(){document.getElementById('blockingModal').classList.remove('hidden');logEvent('blocking_modal_shown');}
+function hideModal(reason){document.getElementById('blockingModal').classList.add('hidden');logEvent('blocking_modal_hidden',{reason});}
+function schedulePopup(){clearTimeout(delayedPopupTimer);setGlobal('Delayed popup scheduled for 2 seconds.');delayedPopupTimer=setTimeout(()=>{showModal();logEvent('delayed_popup_triggered');},2000);logEvent('delayed_popup_scheduled',{delay_ms:2000});}
+function showPromo(){document.getElementById('promo').classList.remove('hidden');logEvent('promotion_shown');}
+function hidePromo(){document.getElementById('promo').classList.add('hidden');logEvent('promotion_hidden');}
+function submitProfile(){
+ const name=document.getElementById('profileName').value.trim(),email=document.getElementById('profileEmail').value.trim();
+ const el=document.getElementById('profileStatus');
+ if(!name||!email){el.className='status bad';el.textContent='Please enter both name and email.';logEvent('profile_validation_failed');return;}
+ el.className='status ok';el.textContent=`Profile saved: ${name} (${email})`;logEvent('profile_saved',{name,email});
+}
+function resetProfile(){document.getElementById('profileName').value='';document.getElementById('profileEmail').value='';const s=document.getElementById('profileStatus');s.className='status';s.textContent='Profile not saved.';}
+function setCalendarStart(value){const [y,m]=value.split('-').map(Number);calendarDate=new Date(y,m-1,1);selectedDate=null;renderCalendar();logEvent('calendar_start_set',{month:value});}
+function openCalendar(){document.getElementById('calendarRoot').classList.remove('hidden');renderCalendar();logEvent('calendar_opened',{visible_month:calendarDate.toISOString().slice(0,7)});}
+function resetDateTest(){document.getElementById('calendarStart').value='2026-10-01';document.getElementById('dateMode').value='arrows';document.getElementById('dateTarget').value='2026-11-18';document.getElementById('appointmentDate').value='';calendarDate=new Date(2026,9,1);selectedDate=null;document.getElementById('calendarRoot').innerHTML='';const s=document.getElementById('dateStatus');s.className='status';s.textContent='No date selected.';}
+function renderCalendar(){
+ const root=document.getElementById('calendarRoot');if(!root)return;
+ const mode=document.getElementById('dateMode').value;
+ const year=calendarDate.getFullYear(),month=calendarDate.getMonth();
+ const monthName=calendarDate.toLocaleString('en-US',{month:'long'});
+ let html='<div class="calendar"><div class="cal-head">';
+ if(mode==='arrows'){
+  html+=`<button aria-label="Previous month" onclick="changeMonth(-1)">‹ Prev</button><div class="cal-title" aria-live="polite">${monthName} ${year}</div><button aria-label="Next month" onclick="changeMonth(1)">Next ›</button>`;
+ } else {
+  html+='<button aria-label="Previous month" onclick="changeMonth(-1)">‹</button>';
+  html+=`<select aria-label="Select month" onchange="selectMonth(this.value)">${Array.from({length:12},(_,i)=>`<option value="${i}" ${i===month?'selected':''}>${new Date(2026,i,1).toLocaleString('en-US',{month:'long'})}</option>`).join('')}</select>`;
+  html+=`<select aria-label="Select year" onchange="selectYear(this.value)">${[2025,2026,2027,2028].map(y=>`<option ${y===year?'selected':''}>${y}</option>`).join('')}</select>`;
+  html+='<button aria-label="Next month" onclick="changeMonth(1)">›</button>';
+ }
+ html+='</div><div class="cal-grid"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>';
+ const first=new Date(year,month,1),start=new Date(year,month,1-first.getDay());
+ for(let i=0;i<42;i++){
+  const d=new Date(start);d.setDate(start.getDate()+i);
+  const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const adjacent=d.getMonth()!==month,disabled=d.getDate()===15;
+  const selected=selectedDate===iso;
+  html+=`<button aria-label="${d.toLocaleString('en-US',{month:'long'})} ${d.getDate()}, ${d.getFullYear()}${adjacent?', adjacent month':''}${disabled?', disabled':''}" data-date="${iso}" class="${adjacent?'adjacent':''} ${selected?'selected':''}" ${disabled?'disabled':''} onclick="chooseDate('${iso}')">${d.getDate()}</button>`;
+ }
+ html+='</div><p class="small muted">Dates on the 15th are intentionally disabled. Adjacent-month dates are shown to test month awareness.</p></div>';
+ root.innerHTML=html;
+}
+function changeMonth(delta){calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+delta,1);renderCalendar();logEvent('calendar_month_changed',{month:calendarDate.toISOString().slice(0,7),delta});}
+function selectMonth(m){calendarDate=new Date(calendarDate.getFullYear(),Number(m),1);renderCalendar();logEvent('calendar_month_selected',{month:Number(m)+1});}
+function selectYear(y){calendarDate=new Date(Number(y),calendarDate.getMonth(),1);renderCalendar();logEvent('calendar_year_selected',{year:Number(y)});}
+function chooseDate(iso){
+ const target=document.getElementById('dateTarget').value;
+ if(iso.endsWith('-15')){logEvent('disabled_date_click_blocked',{date:iso});return;}
+ selectedDate=iso;document.getElementById('appointmentDate').value=iso;renderCalendar();
+ const s=document.getElementById('dateStatus');
+ if(iso===target){s.className='status ok';s.textContent=`Correct date selected and verified: ${iso}`;}
+ else{s.className='status bad';s.textContent=`Wrong date selected: ${iso}. Expected: ${target}`;}
+ logEvent('date_selected',{selected:iso,expected:target,correct:iso===target});
+}
+function resetSearch(){searchRunId++;document.getElementById('searchResults').classList.add('hidden');document.getElementById('searchResults').textContent='';const s=document.getElementById('searchStatus');s.className='status';s.textContent='No search run yet.';}
+function runSearch(){
+ const id=++searchRunId,q=document.getElementById('searchQuery').value.trim()||'item';
+ const delay=Math.max(100,Math.min(15000,Number(document.getElementById('searchDelay').value)||3000));
+ const s=document.getElementById('searchStatus'),r=document.getElementById('searchResults');
+ r.classList.add('hidden');r.textContent='';s.className='status wait';s.textContent='Loading results…';
+ logEvent('search_started',{query:q,delay_ms:delay,run_id:id});
+ setTimeout(()=>{
+  if(id!==searchRunId)return;
+  const items=[`${q} result 1`,`${q} result 2`,`${q} result 3`];
+  r.classList.remove('hidden');r.className='status ok';r.innerHTML=`<b>Results loaded</b><ul>${items.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+  s.className='status ok';s.textContent='Search completed.';
+  logEvent('search_results_loaded',{query:q,count:items.length,run_id:id});
+ },delay);
+}
+function resetSlowSubmit(){submitRunId++;const s=document.getElementById('slowSubmitStatus');s.className='status';s.textContent='Not submitted.';const b=document.getElementById('slowSubmitButton');b.disabled=false;b.textContent='Submit once';}
+function runSlowSubmit(){
+ if(document.getElementById('slowSubmitButton').disabled){logEvent('duplicate_submit_prevented');return;}
+ const id=++submitRunId,delay=Math.max(100,Math.min(20000,Number(document.getElementById('submitDelay').value)||5000)),fail=document.getElementById('failureMode').value==='fail';
+ const b=document.getElementById('slowSubmitButton'),s=document.getElementById('slowSubmitStatus');
+ b.disabled=true;b.textContent='Processing…';s.className='status wait';s.textContent='Submitting… please wait.';
+ logEvent('slow_submit_started',{delay_ms:delay,will_fail:fail,run_id:id});
+ setTimeout(()=>{
+  if(id!==submitRunId)return;
+  b.disabled=false;b.textContent='Submit once';
+  if(fail){s.className='status bad';s.textContent='Submission failed: simulated server error. No record was saved.';logEvent('slow_submit_failed',{run_id:id});}
+  else{s.className='status ok';s.textContent='Success: submission saved once. Reference ID: DEMO-001';logEvent('slow_submit_succeeded',{run_id:id,reference:'DEMO-001'});}
+ },delay);
+}
+function toggleBackground(){
+ if(backgroundTimer){stopBackground();return;}
+ backgroundCount=0;
+ backgroundTimer=setInterval(async()=>{
+  backgroundCount++;
+  // Local same-origin request when served by an HTTP server; fallback to a harmless timer if fetch is unavailable.
+  try { if(location.protocol==='http:'||location.protocol==='https:'){await fetch('/heartbeat?tick='+backgroundCount,{cache:'no-store'}).catch(()=>{});} } catch(e){}
+  const s=document.getElementById('backgroundStatus');s.className='status wait';s.textContent=`Background traffic running · tick ${backgroundCount}`;
+  if(backgroundCount===1||backgroundCount%5===0)logEvent('background_heartbeat',{tick:backgroundCount});
+ },700);
+ logEvent('background_traffic_started');
+}
+function stopBackground(){if(backgroundTimer){clearInterval(backgroundTimer);backgroundTimer=null;logEvent('background_traffic_stopped',{ticks:backgroundCount});}const s=document.getElementById('backgroundStatus');if(s){s.className='status';s.textContent='Background requests are stopped.';}}
+function runDelayedUpdate(){const s=document.getElementById('updateStatus');s.className='status wait';s.textContent='State: UPDATING (old UI may remain briefly)';logEvent('delayed_update_started',{delay_ms:2500});setTimeout(()=>{s.className='status ok';s.textContent='State: UPDATED';logEvent('delayed_update_completed');},2500);}
+function startCombined(){resetCombined();showConsentBanner();setGlobal('Combined test prepared. Dismiss the consent banner appropriately, fill the form, and submit.');}
+function showConsentBanner(){document.getElementById('customizeBanner').classList.add('hidden');document.getElementById('cookieBanner').classList.remove('hidden');logEvent('combined_consent_banner_shown');}
+function submitCombined(){
+ if(combinedBusy){logEvent('combined_duplicate_submit_prevented');return;}
+ const name=document.getElementById('combinedName').value.trim(),email=document.getElementById('combinedEmail').value.trim(),date=document.getElementById('combinedDate').value;
+ const s=document.getElementById('combinedStatus'),b=document.getElementById('combinedSubmit');
+ if(!name||!email||!date){s.className='status bad';s.textContent='Validation error: name, email, and date are required.';logEvent('combined_validation_failed',{name:!!name,email:!!email,date:!!date});return;}
+ if(date!=='2026-11-18'){s.className='status bad';s.textContent=`Wrong date: ${date}. Expected 2026-11-18.`;logEvent('combined_wrong_date',{date});return;}
+ combinedBusy=true;b.disabled=true;s.className='status wait';s.textContent='Saving appointment…';document.getElementById('combinedProgress').style.width='35%';logEvent('combined_submit_started',{name,email,date});
+ setTimeout(()=>{
+  s.className='status ok';s.textContent=`Appointment saved successfully. Reference: APPT-DEMO-001 · Date: ${date}`;document.getElementById('combinedProgress').style.width='100%';b.disabled=false;combinedBusy=false;
+  logEvent('combined_submit_succeeded',{name,email,date,reference:'APPT-DEMO-001'});
+ },4500);
+}
+function resetCombined(){combinedBusy=false;document.getElementById('combinedName').value='';document.getElementById('combinedEmail').value='';document.getElementById('combinedDate').value='2026-11-18';document.getElementById('combinedNote').value='Routine appointment';document.getElementById('combinedSubmit').disabled=false;const s=document.getElementById('combinedStatus');s.className='status';s.textContent='Not submitted.';document.getElementById('combinedProgress').style.width='0%';}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+logEvent('benchmark_loaded',{version:'1.0',features:['popup-modal','date-picker','ajax-waiting','combined']});
+</script>
+</body>
+</html>

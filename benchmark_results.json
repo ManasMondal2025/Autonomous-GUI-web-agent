@@ -1,0 +1,386 @@
+{
+  "summary": {
+    "total_tests": 18,
+    "total_success": 18,
+    "popup_handling_success_rate": "100.0%",
+    "correct_date_selection_rate": "100.0%",
+    "asynchronous_waiting_success_rate": "100.0%",
+    "combined_end_to_end_success_rate": "100.0%",
+    "incorrect_success_rate": "0.0%",
+    "duplicate_submission_rate": "0.0%",
+    "timeout_rate": "0.0%",
+    "average_completion_latency": "1.49s"
+  },
+  "results": [
+    {
+      "test_id": "A1",
+      "scenario": "Cookie Consent Banner Dismissal",
+      "category": "popup",
+      "initial_state": "Cookie banner visible over page",
+      "expected": "Cookie banner dismissed via 'Reject optional cookies'",
+      "actual": "Banner hidden=True, preferred_button='Reject optional cookies'",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "detect_popup:consent_banner",
+        "click:Reject optional cookies",
+        "verify_dismissal"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 1.037,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "A2",
+      "scenario": "Blocking Interstitial Modal Dismissal",
+      "category": "popup",
+      "initial_state": "Blocking modal backdrop active",
+      "expected": "Modal dismissed via safe cancel/close",
+      "actual": "Modal hidden=True",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "detect_popup:blocking_modal",
+        "click:Cancel and continue",
+        "verify_dismissal"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.864,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "A3",
+      "scenario": "Delayed Popup Detection & Dismissal",
+      "category": "popup",
+      "initial_state": "Popup scheduled with 2s delay",
+      "expected": "Modal detected upon appearance and dismissed",
+      "actual": "Delayed modal dismissed=True",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "wait_2.2s",
+        "detect_popup:blocking_modal",
+        "click:Cancel and continue",
+        "verify_dismissal"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 2.847,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "A4",
+      "scenario": "Non-blocking Promotion Handling",
+      "category": "popup",
+      "initial_state": "Non-blocking promo banner in corner",
+      "expected": "Promo preserved/ignored without disrupting main task",
+      "actual": "Promo skipped=True, status='Profile saved: Alex Rivera (alex@example.test)'",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "classify:non_blocking_promo",
+        "skip_dismissal",
+        "fill_profile",
+        "save_profile"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.616,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "A5",
+      "scenario": "Consent Choice Customization",
+      "category": "popup",
+      "initial_state": "Banner with 3 choices",
+      "expected": "Customize opened, analytics unchecked, saved",
+      "actual": "Customize opened=True, optin_unchecked=True, closed=True",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "click:Customize",
+        "verify_opt_in_false",
+        "click:Save settings"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.62,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "B1",
+      "scenario": "Forward Month Navigation (Oct -> Nov 2026)",
+      "category": "date",
+      "initial_state": "Calendar starting at October 2026",
+      "expected": "Navigated forward to November 2026, selected 18th",
+      "actual": "Selected date=2026-11-18, input_val=2026-11-18",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "navigate_month_next",
+        "click_day:18",
+        "verify_date_selection"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.84,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "B2",
+      "scenario": "Backward Month Navigation (Dec -> Nov 2026)",
+      "category": "date",
+      "initial_state": "Calendar starting at December 2026",
+      "expected": "Navigated backward to November 2026, selected 18th",
+      "actual": "Selected date=2026-11-18, input_val=2026-11-18",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "navigate_month_prev",
+        "click_day:18",
+        "verify_date_selection"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.833,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "B3",
+      "scenario": "Dropdown Mode Selection (Select elements)",
+      "category": "date",
+      "initial_state": "Calendar in dropdowns mode",
+      "expected": "Month and year selected via dropdowns, 18th clicked",
+      "actual": "Selected date=2026-11-18, input_val=2026-11-18",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "select_month_dropdown",
+        "select_year_dropdown",
+        "click_day:18",
+        "verify_date_selection"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.862,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "B4",
+      "scenario": "Multi-month Navigation (June -> Nov 2026)",
+      "category": "date",
+      "initial_state": "Calendar starting at June 2026 (5-month delta)",
+      "expected": "Navigated 5 months forward, selected non-adjacent 18th",
+      "actual": "Selected date=2026-11-18, input_val=2026-11-18",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "navigate_forward_4_times",
+        "filter_not_adjacent",
+        "click_day:18",
+        "verify_date_selection"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 1.537,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "B5",
+      "scenario": "Disabled Date Handling & Substitution Refusal",
+      "category": "date",
+      "initial_state": "15th of the month is intentionally disabled",
+      "expected": "Selection of 15th refused, invalid substitution prevented",
+      "actual": "Refused=True, reason='Requested date 2026-11-15 is disabled and unavailable.', input_val=''",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "detect_disabled_date_button",
+        "refuse_selection_and_substitution"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.425,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "B6",
+      "scenario": "Date Verification STV Guard",
+      "category": "date",
+      "initial_state": "Wrong date (2026-11-17) present in observed DOM",
+      "expected": "STV detects mismatch with expected (2026-11-18) and returns FAIL",
+      "actual": "STV decision=FAIL, confidence=0.9",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "observe_date_field",
+        "verify_date_mismatch",
+        "issue_rejection"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.0,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "C1",
+      "scenario": "Delayed Search Results (Observable condition)",
+      "category": "async",
+      "initial_state": "Search delay set to 1200ms",
+      "expected": "Waits for results list to populate without premature exit",
+      "actual": "Status=completed, STV=PASS",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "type_query",
+        "click_search",
+        "wait_for_results",
+        "verify_results_loaded"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 1.568,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "C2",
+      "scenario": "Persistent Background Traffic Tolerance",
+      "category": "async",
+      "initial_state": "Heartbeat requests firing every 700ms",
+      "expected": "Search completes smoothly without networkidle stall",
+      "actual": "Background active: 'Background traffic running \u00b7 tick 1', search completed: True",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "start_heartbeat",
+        "trigger_search",
+        "wait_for_condition",
+        "stop_heartbeat"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 2.595,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "C3",
+      "scenario": "Slow Successful Form Submission",
+      "category": "async",
+      "initial_state": "Processing delay 1500ms, button disabled during submit",
+      "expected": "Single submit, waits for completion, reference DEMO-001 verified",
+      "actual": "Status=completed, STV=PASS",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "safe_submit:#slowSubmitButton",
+        "wait_for_success_marker",
+        "verify_reference_id"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 1.942,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "C4",
+      "scenario": "Failed Submission Error Detection",
+      "category": "async",
+      "initial_state": "Simulated server error mode active",
+      "expected": "Explicit error detected promptly, prevented spurious success",
+      "actual": "Status=failed, reason='Submission failed: Submission failed: simulated server error. No record was saved.'",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "safe_submit:#slowSubmitButton",
+        "detect_failure_marker",
+        "reject_corrupt_success"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 1.303,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "C5",
+      "scenario": "Multi-stage State Transition",
+      "category": "async",
+      "initial_state": "Button triggers 2.5s transient state (UPDATING)",
+      "expected": "Transient state ignored, terminal 'State: UPDATED' confirmed",
+      "actual": "Transient='State: UPDATING (old UI may remain briefly)', final='None'",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "trigger_update",
+        "ignore_transient_updating",
+        "wait_for_terminal_state",
+        "verify_updated"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 2.831,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "C6",
+      "scenario": "Asynchronous Timeout Handling",
+      "category": "async",
+      "initial_state": "Condition configured to never materialize",
+      "expected": "Bounded timeout triggered without hanging process",
+      "actual": "Status=timeout, reason='Timed out waiting for impossible condition after 300ms'",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "poll_predicate",
+        "trigger_bounded_timeout",
+        "capture_diagnostics"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 0.409,
+      "failure_reason": ""
+    },
+    {
+      "test_id": "D",
+      "scenario": "Combined End-to-End Appointment Workflow",
+      "category": "combined",
+      "initial_state": "Fresh benchmark page with consent banner & appointment form",
+      "expected": "Cookie rejected, form filled, date 2026-11-18 set, submitted once, ref APPT-DEMO-001 verified",
+      "actual": "Submit success=True, STV=PASS",
+      "stv_result": "PASS",
+      "agent_result": "SUCCESS",
+      "actions": [
+        "detect_consent_banner",
+        "click:Reject optional cookies",
+        "type:#combinedName=Alex Rivera",
+        "type:#combinedEmail=alex@example.test",
+        "select_date:2026-11-18",
+        "safe_submit_and_wait:#combinedSubmit",
+        "verify_async_result:APPT-DEMO-001"
+      ],
+      "attempts": 1,
+      "duplicate_actions": 0,
+      "recovery": "no",
+      "latency": 5.775,
+      "failure_reason": ""
+    }
+  ]
+}

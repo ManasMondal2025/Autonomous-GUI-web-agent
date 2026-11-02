@@ -1,0 +1,62 @@
+# Base configuration for GUI Web Agent
+
+project:
+  name: "gui-web-agent"
+  version: "0.1.0"
+  description: "Autonomous GUI/Web Agent with Visual Grounding"
+
+browser:
+  type: "chromium"
+  headless: true
+  viewport:
+    width: 1280
+    height: 720
+  timeout_ms: 30000
+  user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  disable_images: false
+  disable_javascript: false
+  slow_mo_ms: 0
+
+paths:
+  data_dir: "./data"
+  screenshot_dir: "./data/screenshots"
+  trajectory_dir: "./data/trajectories"
+  screenspot_dir: "./data/screenspot"
+  webarena_dir: "./data/webarena"
+  model_cache_dir: "./data/models"
+
+logging:
+  level: "INFO"
+  save_trajectories: true
+  save_screenshots: true
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+dom:
+  interactive_tags:
+    - "button"
+    - "a"
+    - "input"
+    - "textarea"
+    - "select"
+    - "checkbox"
+    - "radio"
+    - "label"
+  interactive_roles:
+    - "button"
+    - "link"
+    - "textbox"
+    - "checkbox"
+    - "radio"
+    - "combobox"
+    - "menuitem"
+    - "tab"
+    - "switch"
+    - "slider"
+  only_visible: true
+  only_in_viewport: true
+  min_size:
+    width: 5
+    height: 5
+
+random:
+  seed: 42

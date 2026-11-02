@@ -1,0 +1,21 @@
+# Standalone CAPTCHA detection config (merge into base.yaml or pass to CaptchaConfig).
+# No agent/HITL behavior is changed by this file alone.
+captcha_detection:
+  enabled: true
+  dom_detection: true
+  frame_detection: true
+  text_detection: true
+  structural_detection: true
+  ocr_detection: false
+  vlm_detection: false
+  confidence_threshold: 0.60
+  blocking_threshold: 0.85
+  max_text_chars: 8000
+  weights:
+    known_iframe: 0.60
+    dom_widget: 0.60
+    provider_frame: 0.60
+    challenge_text: 0.50
+    interactive_structure: 0.40
+    ocr_text: 0.40
+    vlm: 0.70

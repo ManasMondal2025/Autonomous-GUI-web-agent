@@ -1,0 +1,29 @@
+Expected-transition schema (shared by the local planner and STV).
+
+Every planned action carries an expected_transition object describing the
+state transition the action is supposed to cause. STV independently checks
+the OBSERVED after-state against this prediction; matching text alone is
+never sufficient.
+
+Shape:
+{"must_change": ["<state description that MUST become true>"],
+ "must_be_true": ["<observable fact that MUST hold afterwards>"],
+ "must_remain_true": ["<fact that must NOT break>"],
+ "must_not_happen": ["<forbidden outcome>"]}
+
+Examples:
+- Clicking a Cart button:
+  {"must_change": ["cart view is visible"],
+   "must_be_true": ["cart contents are visible"],
+   "must_remain_true": ["user remains logged in"],
+   "must_not_happen": ["error page", "login page"]}
+- Typing into a search box:
+  {"must_change": ["search box contains the typed text"],
+   "must_be_true": [],
+   "must_remain_true": [],
+   "must_not_happen": ["page navigated away unexpectedly"]}
+
+Deterministic fallback (no VLM call) when a planner omits the object:
+- click/type: must_change ["visible page state changes as a result of the
+  action"]; others [].
+- scroll/wait: all lists [] (no state change is asserted).

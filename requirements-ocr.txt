@@ -1,0 +1,12 @@
+# Optional OCR dependencies (PaddleOCR backend).
+#
+# These are intentionally NOT in requirements.txt: src/browser/ocr.py
+# lazy-imports paddleocr, so the project runs without OCR. Install this
+# file only for --ocr cascade experiments.
+#
+# Validated: paddleocr 3.7.0 + paddlepaddle 3.3.1 (CPU) on macOS arm64.
+# PaddleOCR downloads detection/recognition weights to ~/.paddlex/ on
+# first use (~100MB, outside the repo).
+
+paddleocr==3.7.0
+paddlepaddle==3.3.1
